@@ -6,11 +6,13 @@ RUN apk add --no-cache \
     curl \
     libpng-dev \
     libzip-dev \
-    zlib-dev
+    zlib-dev \
+    postgresql-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install gd \
-    && docker-php-ext-install zip
+    && docker-php-ext-install zip \
+    && docker-php-ext-install pdo_pgsql
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -20,5 +22,10 @@ RUN apk add --no-cache nodejs npm
 
 # Set working directory
 WORKDIR /var/www
+
+COPY dockerfiles/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm"]
 
 EXPOSE 9000
