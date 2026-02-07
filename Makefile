@@ -2,11 +2,11 @@
 
 # Corrige permissões de storage e bootstrap/cache no container da aplicação
 fix-permissions:
-	docker compose exec application chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+	docker compose exec app chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 # Acessa o shell do container da aplicação (PHP)
 sh-app:
-	docker compose exec application sh
+	docker compose exec app sh
 
 # Acessa o shell do container Nginx
 sh-nginx:
