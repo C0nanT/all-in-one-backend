@@ -21,7 +21,7 @@ class PayableAccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'account' => fake()->words(3, true),
+            'name' => fake()->words(3, true),
             'amount' => fake()->randomFloat(2, 10, 5000),
             'status' => PayableAccountStatus::Open,
         ];

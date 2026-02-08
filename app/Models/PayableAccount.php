@@ -18,7 +18,7 @@ class PayableAccount extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'account',
+        'name',
         'amount',
         'status',
     ];

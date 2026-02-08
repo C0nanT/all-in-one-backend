@@ -14,7 +14,7 @@ class PayableAccountResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'account' => $this->account,
+            'name' => $this->name,
             'amount' => (float) $this->amount,
             'status' => $this->status->value,
             'created_at' => $this->created_at?->toIso8601String(),

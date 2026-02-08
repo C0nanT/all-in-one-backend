@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payable_accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('account', 80);
+            $table->string('name', 80);
             $table->decimal('amount', 15, 2);
             $table->string('status', 20)->default('open');
             $table->timestamps();

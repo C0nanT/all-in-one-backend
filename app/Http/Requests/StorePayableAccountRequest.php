@@ -17,7 +17,7 @@ class StorePayableAccountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account' => ['required', 'string', 'max:80'],
+            'name' => ['required', 'string', 'max:80'],
             'amount' => ['required', 'numeric', 'min:0'],
             'status' => ['nullable', 'string', 'in:open,paid'],
         ];

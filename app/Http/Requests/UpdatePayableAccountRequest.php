@@ -17,7 +17,7 @@ class UpdatePayableAccountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account' => ['sometimes', 'string', 'max:80'],
+            'name' => ['sometimes', 'string', 'max:80'],
             'amount' => ['sometimes', 'numeric', 'min:0'],
             'status' => ['sometimes', 'string', 'in:open,paid'],
         ];
