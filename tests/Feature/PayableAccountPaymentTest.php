@@ -97,3 +97,24 @@ test('store payment returns 404 for non-existent payable account', function (): 
 
     $response->assertNotFound();
 });
+
+test('store payment fails when same period already exists for payable account', function (): void {
+    $payableAccount = PayableAccount::factory()->create();
+    $payer = User::factory()->create();
+    $period = '2026-02-01';
+
+    $this->postJson("/api/payable-accounts/{$payableAccount->id}/payments", [
+        'amount' => 100,
+        'payer_id' => $payer->id,
+        'period' => $period,
+    ])->assertCreated();
+
+    $response = $this->postJson("/api/payable-accounts/{$payableAccount->id}/payments", [
+        'amount' => 200,
+        'payer_id' => $payer->id,
+        'period' => $period,
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['period']);
+});
