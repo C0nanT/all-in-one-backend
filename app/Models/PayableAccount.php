@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\PayableAccountStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PayableAccount extends Model
@@ -19,8 +19,6 @@ class PayableAccount extends Model
      */
     protected $fillable = [
         'name',
-        'amount',
-        'status',
     ];
 
     /**
@@ -30,9 +28,14 @@ class PayableAccount extends Model
      */
     protected function casts(): array
     {
-        return [
-            'amount' => 'decimal:2',
-            'status' => PayableAccountStatus::class,
-        ];
+        return [];
+    }
+
+    /**
+     * @return HasMany<PayableAccountPayment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(PayableAccountPayment::class, 'payable_account_id')->orderByDesc('period');
     }
 }

@@ -18,8 +18,6 @@ class StorePayableAccountRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:80'],
-            'amount' => ['required', 'numeric', 'min:0'],
-            'status' => ['nullable', 'string', 'in:open,paid'],
         ];
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PayableAccountResource extends JsonResource
+class PayableAccountPaymentResource extends JsonResource
 {
     /**
      * @return array<string, mixed>
@@ -14,8 +14,10 @@ class PayableAccountResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'payments' => PayableAccountPaymentResource::collection($this->whenLoaded('payments')),
+            'payable_account_id' => $this->payable_account_id,
+            'amount' => (float) $this->amount,
+            'payer_id' => $this->payer_id,
+            'period' => $this->period?->format('Y-m-d'),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

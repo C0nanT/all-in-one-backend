@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\PayableAccount;
-use App\PayableAccountStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,13 +21,6 @@ class PayableAccountFactory extends Factory
     {
         return [
             'name' => fake()->words(3, true),
-            'amount' => fake()->randomFloat(2, 10, 5000),
-            'status' => PayableAccountStatus::Open,
         ];
-    }
-
-    public function paid(): static
-    {
-        return $this->state(fn (array $attributes) => ['status' => PayableAccountStatus::Paid]);
     }
 }

@@ -24,8 +24,6 @@ class PayableAccountService
 
     public function create(array $data): PayableAccount
     {
-        $data['status'] ??= 'open';
-
         return $this->repository->create($data);
     }
 

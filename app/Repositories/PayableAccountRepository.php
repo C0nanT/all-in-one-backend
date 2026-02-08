@@ -10,7 +10,10 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
 {
     public function getAll(): Collection
     {
-        return PayableAccount::query()->orderBy('created_at', 'desc')->get();
+        return PayableAccount::query()
+            ->with('payments')
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function find(int $id): ?PayableAccount

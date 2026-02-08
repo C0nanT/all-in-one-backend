@@ -18,8 +18,6 @@ class UpdatePayableAccountRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string', 'max:80'],
-            'amount' => ['sometimes', 'numeric', 'min:0'],
-            'status' => ['sometimes', 'string', 'in:open,paid'],
         ];
     }
 }
