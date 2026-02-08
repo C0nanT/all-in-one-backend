@@ -8,8 +8,11 @@ use App\Http\Requests\UpdatePayableAccountRequest;
 use App\Http\Resources\PayableAccountResource;
 use App\Models\PayableAccount;
 use App\Services\PayableAccountService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\ValidationException;
 
 class PayableAccountController extends Controller
 {
@@ -17,9 +20,18 @@ class PayableAccountController extends Controller
         private readonly PayableAccountService $service
     ) {}
 
-    public function index(): AnonymousResourceCollection
+    /**
+     * @throws ValidationException
+     */
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $accounts = $this->service->list();
+        $period = null;
+        if ($request->has('period')) {
+            $request->validate(['period' => ['required', 'date']]);
+            $period = Carbon::parse($request->query('period'))->startOfMonth()->format('Y-m-d');
+        }
+
+        $accounts = $this->service->list($period);
 
         return PayableAccountResource::collection($accounts);
     }

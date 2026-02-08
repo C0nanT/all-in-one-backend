@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface PayableAccountRepositoryInterface
 {
-    public function getAll(): Collection;
+    /**
+     * @param  string|null  $period  First day of month (Y-m-d) to filter payments; null = all payments
+     */
+    public function getAll(?string $period = null): Collection;
 
     public function find(int $id): ?PayableAccount;
 

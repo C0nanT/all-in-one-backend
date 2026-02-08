@@ -12,9 +12,12 @@ class PayableAccountService
         private readonly PayableAccountRepositoryInterface $repository
     ) {}
 
-    public function list(): Collection
+    /**
+     * @param  string|null  $period  Optional period (Y-m or Y-m-d) to filter payments by month
+     */
+    public function list(?string $period = null): Collection
     {
-        return $this->repository->getAll();
+        return $this->repository->getAll($period);
     }
 
     public function find(int $id): ?PayableAccount

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\PayableAccount;
+use App\Models\PayableAccountPayment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -31,6 +32,59 @@ test('index returns empty when there are no accounts', function (): void {
 
     $response->assertSuccessful()
         ->assertJsonPath('data', []);
+});
+
+test('index filters payments by period when period query param is passed', function (): void {
+    $account = PayableAccount::factory()->create(['name' => 'Account with payments']);
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account->id,
+        'amount' => 100,
+        'payer_id' => $this->user->id,
+        'period' => '2026-01-01',
+    ]);
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account->id,
+        'amount' => 200,
+        'payer_id' => $this->user->id,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->getJson('/api/payable-accounts?period=2026-02');
+
+    $response->assertSuccessful()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.name', 'Account with payments')
+        ->assertJsonCount(1, 'data.0.payments')
+        ->assertJsonPath('data.0.payments.0.period', '2026-02-01');
+    expect((float) $response->json('data.0.payments.0.amount'))->toBe(200.0);
+});
+
+test('index returns all payments when period query param is omitted', function (): void {
+    $account = PayableAccount::factory()->create();
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account->id,
+        'amount' => 100,
+        'payer_id' => $this->user->id,
+        'period' => '2026-01-01',
+    ]);
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account->id,
+        'amount' => 200,
+        'payer_id' => $this->user->id,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->getJson('/api/payable-accounts');
+
+    $response->assertSuccessful()
+        ->assertJsonCount(2, 'data.0.payments');
+});
+
+test('index returns 422 when period query param is invalid', function (): void {
+    $response = $this->getJson('/api/payable-accounts?period=invalid');
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['period']);
 });
 
 test('can create payable account with valid data', function (): void {
