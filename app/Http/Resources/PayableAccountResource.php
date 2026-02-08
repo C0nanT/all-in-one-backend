@@ -15,6 +15,7 @@ class PayableAccountResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'status' => $this->whenLoaded('payments', fn ($payments) => $payments->first() ? 'paid' : 'unpaid'),
             'payment' => $this->whenLoaded('payments', fn ($payments) => $payments->first() ? new PayableAccountPaymentResource($payments->first()) : null),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
