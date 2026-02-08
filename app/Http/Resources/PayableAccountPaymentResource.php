@@ -14,7 +14,7 @@ class PayableAccountPaymentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'payable_account_id' => $this->payable_account_id,
+            // 'payable_account_id' => $this->payable_account_id,
             'amount' => (float) $this->amount,
             'payer_id' => $this->payer_id,
             'period' => $this->period?->format('d-m-Y'),

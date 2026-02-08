@@ -5,12 +5,16 @@ namespace App\Repositories;
 use App\Contracts\Repositories\PayableAccountRepositoryInterface;
 use App\Models\PayableAccount;
 use App\Models\PayableAccountPayment;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 class PayableAccountRepository implements PayableAccountRepositoryInterface
 {
-    public function getAll(?string $period = null): Collection
+    public function getAll(string $period): Collection
     {
+        $start = Carbon::parse($period)->startOfMonth()->format('Y-m-d');
+        $end = Carbon::parse($period)->endOfMonth()->format('Y-m-d');
+
         $latestPaymentIdSubquery = PayableAccountPayment::query()
             ->selectRaw('MAX(id)')
             ->groupBy('payable_account_id', 'period');
@@ -18,13 +22,9 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
         $query = PayableAccount::query()
             ->orderByDesc('id')
             ->with([
-                'payments' => function ($q) use ($period, $latestPaymentIdSubquery): void {
+                'payments' => function ($q) use ($latestPaymentIdSubquery, $start, $end): void {
                     $q->whereIn('id', $latestPaymentIdSubquery);
-                    if ($period !== null) {
-                        $q->whereDate('period', $period);
-                    }else{
-                        $q->whereDate('period','>=',now()->startOfMonth()->format('Y-m-d'));
-                    }
+                    $q->whereBetween('period', [$start, $end]);
                 },
             ]);
 
