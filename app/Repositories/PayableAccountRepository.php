@@ -26,6 +26,7 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
                     $q->whereIn('id', $latestPaymentIdSubquery);
                     $q->whereBetween('period', [$start, $end]);
                 },
+                'payments.payer',
             ]);
 
         return $query->get();
