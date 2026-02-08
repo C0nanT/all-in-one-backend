@@ -5,8 +5,9 @@ namespace App\Http\Requests;
 use App\Models\PayableAccountPayment;
 use Carbon\Carbon;
 use Closure;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+
 class StorePayableAccountPaymentRequest extends FormRequest
 {
     public function authorize(): bool
