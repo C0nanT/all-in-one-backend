@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\Repositories\PayableAccountPaymentRepositoryInterface;
 use App\Contracts\Repositories\PayableAccountRepositoryInterface;
+use App\Repositories\PayableAccountPaymentRepository;
 use App\Repositories\PayableAccountRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             PayableAccountRepositoryInterface::class,
             PayableAccountRepository::class
+        );
+        $this->app->bind(
+            PayableAccountPaymentRepositoryInterface::class,
+            PayableAccountPaymentRepository::class
         );
     }
 
