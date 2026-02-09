@@ -27,6 +27,6 @@ jobs:
       - name: Run tests
         run: |
           docker compose run --rm app sh -c "\
-            php artisan key:generate --force && \
             composer install --no-interaction --prefer-dist && \
+            php artisan key:generate --force && \
             composer test"
