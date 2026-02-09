@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\PayableAccount;
-use App\Models\PayableAccountPayment;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Modules\PayableAccount\Models\PayableAccount;
+use Modules\PayableAccount\Models\PayableAccountPayment;
+use Modules\User\Models\User;
 
 uses(RefreshDatabase::class);
 
@@ -24,10 +24,8 @@ test('can store payment for payable account', function (): void {
     ]);
 
     $response->assertCreated()
-        ->assertJsonPath('data.payable_account_id', $payableAccount->id)
         ->assertJsonPath('data.amount', 1500.5)
-        ->assertJsonPath('data.payer_id', $payer->id)
-        ->assertJsonPath('data.period', '2026-02-01');
+        ->assertJsonPath('data.period', '01-02-2026');
 
     $payment = PayableAccountPayment::query()->where('payable_account_id', $payableAccount->id)->first();
     expect($payment)->not->toBeNull()

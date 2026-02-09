@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\PayableAccount;
 use Illuminate\Database\Seeder;
+use Modules\PayableAccount\Models\PayableAccount;
 
 class AccountsSeeder extends Seeder
 {
@@ -12,7 +12,8 @@ class AccountsSeeder extends Seeder
      */
     public function run(): void
     {
-        $accounts = ['Aluguel',  'Luz', 'Internet casa'];
+        $accounts = ['Aluguel','Celes','Internet casa','Cartão Conan','Cartão Emilly', 'Transporte Conan', 'Transporte Emilly', 'Internet cell Emilly'
+        ,'Internet cell Conan', 'Unimed Conan','Comida / Flash', 'Uniodonto Conan'];
         $insertData = [];
         foreach ($accounts as $account) {
             $insertData[] = [
