@@ -36,6 +36,9 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 ## Application Structure & Architecture
 
+- This application uses **MVC Modular** (no external package): domain code lives under `modules/` with PSR-4 namespace `Modules\`.
+- **Modules:** `User` (Models, Http), `Auth` (Http), `PayableAccount` (Models, Http, Contracts, Repositories, Services). API routes are in `routes/api.php` via `require` of each `modules/*/routes/api.php`.
+- When adding features, prefer putting new code in the appropriate module (or a new module) rather than in `app/`. Keep `app/` for app-wide bootstrap (Controller base, AppServiceProvider).
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
 
