@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\PayableAccount;
 use Illuminate\Database\Seeder;
+use Modules\PayableAccount\Models\PayableAccount;
 
 class AccountsSeeder extends Seeder
 {

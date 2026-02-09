@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use App\Contracts\Repositories\PayableAccountPaymentRepositoryInterface;
-use App\Contracts\Repositories\PayableAccountRepositoryInterface;
-use App\Repositories\PayableAccountPaymentRepository;
-use App\Repositories\PayableAccountRepository;
 use Illuminate\Support\ServiceProvider;
+use Modules\PayableAccount\Contracts\Repositories\PayableAccountPaymentRepositoryInterface;
+use Modules\PayableAccount\Contracts\Repositories\PayableAccountRepositoryInterface;
+use Modules\PayableAccount\Repositories\PayableAccountPaymentRepository;
+use Modules\PayableAccount\Repositories\PayableAccountRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
