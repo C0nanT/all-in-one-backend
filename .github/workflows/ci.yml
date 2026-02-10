@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build app image
+        run: docker compose build app
+
+      - name: Run tests
+        run: |
+          docker compose run --rm app sh -c "\
+            composer install --no-interaction --prefer-dist && \
+            php artisan key:generate --force && \
+            composer test"
