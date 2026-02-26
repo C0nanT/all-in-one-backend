@@ -1,20 +1,24 @@
-.PHONY: sh-app sh-nginx sh-postgres sh fix-permissions
+.PHONY: sh-app sh-nginx sh-postgres sh fix-permissions up logs
 
 # Corrige permissões de storage e bootstrap/cache no container da aplicação
 fix-permissions:
 	docker compose exec app chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Acessa o shell do container da aplicação (PHP)
 sh-app:
 	docker compose exec app sh
 
-# Acessa o shell do container Nginx
 sh-nginx:
 	docker compose exec nginx sh
 
-# Acessa o shell do container PostgreSQL
 sh-postgres:
 	docker compose exec postgres sh
 
-# Atalho: sh sem argumento abre o container da aplicação
-sh: sh-app
+up:
+	docker compose up -d
+
+down:
+	docker compose down
+
+logs:
+	docker compose logs -f app-dev
+
