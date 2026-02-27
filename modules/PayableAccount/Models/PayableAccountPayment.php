@@ -2,6 +2,8 @@
 
 namespace Modules\PayableAccount\Models;
 
+use Database\Factories\PayableAccountPaymentFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +11,13 @@ use Modules\User\Models\User;
 
 class PayableAccountPayment extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    /** @use HasFactory<PayableAccountPaymentFactory> */
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return PayableAccountPaymentFactory::new();
+    }
 
     /**
      * The attributes that are mass assignable.

@@ -11,4 +11,11 @@ class PayableAccountPaymentRepository implements PayableAccountPaymentRepository
     {
         return PayableAccountPayment::query()->create($data);
     }
+
+    public function update(PayableAccountPayment $payment, array $data): PayableAccountPayment
+    {
+        $payment->update($data);
+
+        return $payment->fresh(['payer']);
+    }
 }
