@@ -4,6 +4,7 @@ namespace Modules\PayableAccount\Http\Requests;
 
 use Carbon\Carbon;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\PayableAccount\Models\PayableAccount;
 use Modules\PayableAccount\Models\PayableAccountPayment;
@@ -18,8 +19,9 @@ class UpdatePayableAccountPaymentRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if ($this->has('period')) {
+            $period = $this->input('period');
             $this->merge([
-                'period' => Carbon::parse($this->input('period'))->startOfMonth()->format('Y-m-d'),
+                'period' => Carbon::parse(is_string($period) ? $period : '')->startOfMonth()->format('Y-m-d'),
             ]);
         }
     }
@@ -45,9 +47,12 @@ class UpdatePayableAccountPaymentRequest extends FormRequest
                 'required',
                 'date',
                 function (string $attribute, mixed $period, Closure $fail) use ($payableAccountId, $paymentId): void {
+                    $periodValue = $period instanceof DateTimeInterface
+                        ? $period->format('Y-m-d')
+                        : (is_string($period) ? $period : '');
                     $exists = PayableAccountPayment::query()
                         ->where('payable_account_id', $payableAccountId)
-                        ->whereDate('period', $period)
+                        ->whereDate('period', $periodValue)
                         ->where('id', '!=', $paymentId)
                         ->exists();
                     if ($exists) {

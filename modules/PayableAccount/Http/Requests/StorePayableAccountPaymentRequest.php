@@ -19,8 +19,9 @@ class StorePayableAccountPaymentRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if ($this->has('period')) {
+            $period = $this->input('period');
             $this->merge([
-                'period' => Carbon::parse($this->input('period'))->startOfMonth()->format('Y-m-d'),
+                'period' => Carbon::parse(is_string($period) ? $period : '')->startOfMonth()->format('Y-m-d'),
             ]);
         }
     }
@@ -43,7 +44,7 @@ class StorePayableAccountPaymentRequest extends FormRequest
                 function (string $attribute, mixed $value, Closure $fail) use ($payableAccountId): void {
                     $period = $value instanceof Carbon
                         ? $value->format('Y-m-d')
-                        : Carbon::parse($value)->format('Y-m-d');
+                        : Carbon::parse(is_string($value) ? $value : '')->format('Y-m-d');
                     $exists = PayableAccountPayment::query()
                         ->where('payable_account_id', $payableAccountId)
                         ->whereDate('period', $period)
