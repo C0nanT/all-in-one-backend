@@ -33,6 +33,47 @@ test('can store payment for payable account', function (): void {
         ->and($payment->period->format('Y-m-d'))->toBe('2026-02-01');
 });
 
+test('can store payment with amount zero and list returns status paid_zero', function (): void {
+    $payableAccount = PayableAccount::factory()->create();
+
+    $response = $this->postJson("/api/payable-accounts/{$payableAccount->id}/payments", [
+        'amount' => 0,
+        'payer_id' => null,
+        'period' => '2026-02-15',
+    ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.period', '01-02-2026')
+        ->assertJsonPath('data.payer_id', null)
+        ->assertJsonPath('data.payer', null);
+    expect((float) $response->json('data.amount'))->toBe(0.0);
+
+    $payment = PayableAccountPayment::query()->where('payable_account_id', $payableAccount->id)->first();
+    expect($payment)->not->toBeNull()
+        ->and((float) $payment->amount)->toBe(0.0)
+        ->and($payment->payer_id)->toBeNull();
+
+    $listResponse = $this->getJson('/api/payable-accounts?period=2026-02');
+    $listResponse->assertSuccessful()
+        ->assertJsonPath('data.0.status', 'paid_zero')
+        ->assertJsonPath('data.0.payment.payer_id', null)
+        ->assertJsonPath('data.0.payment.payer', null);
+    expect((float) $listResponse->json('data.0.payment.amount'))->toBe(0.0);
+});
+
+test('store payment with amount zero can omit payer_id', function (): void {
+    $payableAccount = PayableAccount::factory()->create();
+
+    $response = $this->postJson("/api/payable-accounts/{$payableAccount->id}/payments", [
+        'amount' => 0,
+        'period' => '2026-02-15',
+    ]);
+
+    $response->assertCreated();
+    $payment = PayableAccountPayment::query()->where('payable_account_id', $payableAccount->id)->first();
+    expect($payment->payer_id)->toBeNull();
+});
+
 test('store payment fails without amount', function (): void {
     $payableAccount = PayableAccount::factory()->create();
     $payer = User::factory()->create();
@@ -174,6 +215,60 @@ test('update payment can keep same period when editing other fields', function (
 
     $response->assertSuccessful()
         ->assertJsonPath('data.period', '01-02-2026');
+});
+
+test('update payment fails when amount positive and payer_id null', function (): void {
+    $payableAccount = PayableAccount::factory()->create();
+    $payer = User::factory()->create();
+
+    $payment = PayableAccountPayment::factory()->create([
+        'payable_account_id' => $payableAccount->id,
+        'payer_id' => $payer->id,
+        'amount' => 100,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->putJson(
+        "/api/payable-accounts/{$payableAccount->id}/payments/{$payment->id}",
+        [
+            'amount' => 50,
+            'payer_id' => null,
+            'period' => '2026-02-01',
+        ]
+    );
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['payer_id']);
+});
+
+test('update payment to amount zero can set payer_id null', function (): void {
+    $payableAccount = PayableAccount::factory()->create();
+    $payer = User::factory()->create();
+
+    $payment = PayableAccountPayment::factory()->create([
+        'payable_account_id' => $payableAccount->id,
+        'payer_id' => $payer->id,
+        'amount' => 100,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->putJson(
+        "/api/payable-accounts/{$payableAccount->id}/payments/{$payment->id}",
+        [
+            'amount' => 0,
+            'payer_id' => null,
+            'period' => '2026-02-01',
+        ]
+    );
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.payer_id', null)
+        ->assertJsonPath('data.payer', null);
+    expect((float) $response->json('data.amount'))->toBe(0.0);
+
+    $payment->refresh();
+    expect((float) $payment->amount)->toBe(0.0)
+        ->and($payment->payer_id)->toBeNull();
 });
 
 test('update payment fails when period conflicts with another payment', function (): void {

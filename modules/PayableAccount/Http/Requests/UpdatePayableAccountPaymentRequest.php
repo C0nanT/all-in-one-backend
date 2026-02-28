@@ -42,7 +42,7 @@ class UpdatePayableAccountPaymentRequest extends FormRequest
 
         return [
             'amount' => ['required', 'numeric', 'min:0'],
-            'payer_id' => ['required', 'integer', 'exists:users,id'],
+            'payer_id' => ['required_unless:amount,0', 'nullable', 'integer', 'exists:users,id'],
             'period' => [
                 'required',
                 'date',

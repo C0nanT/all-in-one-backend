@@ -58,6 +58,22 @@ test('index filters payments by period when period query param is passed', funct
     expect((float) $response->json('data.0.payment.amount'))->toBe(200.0);
 });
 
+test('index returns status paid_zero when payment amount is zero', function (): void {
+    $account = PayableAccount::factory()->create(['name' => 'Zero amount account']);
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account->id,
+        'amount' => 0,
+        'payer_id' => $this->user->id,
+        'period' => '2026-01-01',
+    ]);
+
+    $response = $this->getJson('/api/payable-accounts?period=2026-01');
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.0.status', 'paid_zero');
+    expect((float) $response->json('data.0.payment.amount'))->toBe(0.0);
+});
+
 test('index returns payment for period when period query param is passed', function (): void {
     $account = PayableAccount::factory()->create();
     PayableAccountPayment::query()->create([
