@@ -4,6 +4,7 @@ namespace Modules\PayableAccount\Repositories;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\PayableAccount\Contracts\Repositories\PayableAccountRepositoryInterface;
 use Modules\PayableAccount\Models\PayableAccount;
 use Modules\PayableAccount\Models\PayableAccountPayment;
@@ -25,7 +26,7 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
         $query = PayableAccount::query()
             ->orderByDesc('id')
             ->with([
-                'payments' => function ($q) use ($latestPaymentIdSubquery, $start, $end): void {
+                'payments' => function (Relation $q) use ($latestPaymentIdSubquery, $start, $end): void {
                     $q->whereIn('id', $latestPaymentIdSubquery);
                     $q->whereBetween('period', [$start, $end]);
                 },
