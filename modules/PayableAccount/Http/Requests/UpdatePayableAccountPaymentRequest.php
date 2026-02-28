@@ -5,7 +5,7 @@ namespace Modules\PayableAccount\Http\Requests;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Log;
+use Modules\PayableAccount\Models\PayableAccount;
 use Modules\PayableAccount\Models\PayableAccountPayment;
 
 class UpdatePayableAccountPaymentRequest extends FormRequest
@@ -29,10 +29,14 @@ class UpdatePayableAccountPaymentRequest extends FormRequest
      */
     public function rules(): array
     {
-        $payableAccountId = $this->route('payable_account')->id;
-        $paymentId = $this->route('payment')->id;
-        Log::info('payable_account', [$payableAccountId]);
-        Log::info('payment', [$paymentId]);
+        $payableAccount = $this->route('payable_account');
+        $payment = $this->route('payment');
+
+        assert($payableAccount instanceof PayableAccount);
+        assert($payment instanceof PayableAccountPayment);
+
+        $payableAccountId = $payableAccount->id;
+        $paymentId = $payment->id;
 
         return [
             'amount' => ['required', 'numeric', 'min:0'],

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\PayableAccount\Models\PayableAccount;
 use Modules\PayableAccount\Models\PayableAccountPayment;
 
 class StorePayableAccountPaymentRequest extends FormRequest
@@ -29,7 +30,9 @@ class StorePayableAccountPaymentRequest extends FormRequest
      */
     public function rules(): array
     {
-        $payableAccountId = $this->route('payable_account')->id;
+        $payableAccount = $this->route('payable_account');
+        assert($payableAccount instanceof PayableAccount);
+        $payableAccountId = $payableAccount->id;
 
         return [
             'amount' => ['required', 'numeric', 'min:0'],
