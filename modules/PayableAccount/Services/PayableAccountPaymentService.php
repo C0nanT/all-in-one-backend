@@ -2,7 +2,6 @@
 
 namespace Modules\PayableAccount\Services;
 
-use Carbon\Carbon;
 use Modules\PayableAccount\Contracts\Repositories\PayableAccountPaymentRepositoryInterface;
 use Modules\PayableAccount\Models\PayableAccount;
 use Modules\PayableAccount\Models\PayableAccountPayment;
@@ -13,11 +12,21 @@ class PayableAccountPaymentService
         private readonly PayableAccountPaymentRepositoryInterface $repository
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function create(PayableAccount $payableAccount, array $data): PayableAccountPayment
     {
         $data['payable_account_id'] = $payableAccount->id;
-        $data['period'] = Carbon::parse($data['period'])->startOfMonth()->format('Y-m-d');
 
         return $this->repository->create($data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function update(PayableAccountPayment $payment, array $data): PayableAccountPayment
+    {
+        return $this->repository->update($payment, $data);
     }
 }

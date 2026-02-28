@@ -12,6 +12,8 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - php - 8.3.6
 - laravel/framework (LARAVEL) - v12
 - laravel/prompts (PROMPTS) - v0
+- laravel/sanctum (SANCTUM) - v4
+- larastan/larastan (LARASTAN) - v3
 - laravel/mcp (MCP) - v0
 - laravel/pint (PINT) - v1
 - laravel/sail (SAIL) - v1
@@ -36,15 +38,8 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 ## Application Structure & Architecture
 
-- This application uses **MVC Modular** (no external package): domain code lives under `modules/` with PSR-4 namespace `Modules\`.
-- **Modules:** `User` (Models, Http), `Auth` (Http), `PayableAccount` (Models, Http, Contracts, Repositories, Services). API routes are in `routes/api.php` via `require` of each `modules/*/routes/api.php`.
-- When adding features, prefer putting new code in the appropriate module (or a new module) rather than in `app/`. Keep `app/` for app-wide bootstrap (Controller base, AppServiceProvider).
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
-
-## Frontend Bundling
-
-- If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
 
 ## Documentation Files
 
@@ -129,6 +124,13 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 - Add useful array shape type definitions when appropriate.
 
+=== tests rules ===
+
+# Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+
 === laravel/core rules ===
 
 # Do Things the Laravel Way
@@ -180,10 +182,6 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
 - When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
 
-## Vite Error
-
-- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
-
 === laravel/v12 rules ===
 
 # Laravel 12
@@ -225,4 +223,5 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - Do NOT delete tests without approval.
 - CRITICAL: ALWAYS use `search-docs` tool for version-specific Pest documentation and updated code examples.
 - IMPORTANT: Activate `pest-testing` every time you're working with a Pest or testing-related task.
+
 </laravel-boost-guidelines>

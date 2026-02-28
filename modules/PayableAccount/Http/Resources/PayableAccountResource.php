@@ -5,6 +5,9 @@ namespace Modules\PayableAccount\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \Modules\PayableAccount\Models\PayableAccount
+ */
 class PayableAccountResource extends JsonResource
 {
     /**

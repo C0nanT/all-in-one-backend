@@ -91,7 +91,9 @@ test('login fails with invalid credentials', function (): void {
 test('user route returns 401 without token', function (): void {
     $response = $this->getJson('/api/user');
 
-    $response->assertUnauthorized();
+    $response->assertUnauthorized()
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('meta.error', 'Unauthenticated.');
 });
 
 test('user route returns authenticated user with valid token', function (): void {
@@ -132,5 +134,7 @@ test('after logout token is invalid for user route', function (): void {
         'Authorization' => 'Bearer '.$token,
     ]);
 
-    $response->assertUnauthorized();
+    $response->assertUnauthorized()
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('meta.error', 'Unauthenticated.');
 });

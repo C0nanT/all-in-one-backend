@@ -4,7 +4,11 @@ namespace Modules\PayableAccount\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\User\Models\User;
 
+/**
+ * @mixin \Modules\PayableAccount\Models\PayableAccountPayment
+ */
 class PayableAccountPaymentResource extends JsonResource
 {
     /**
@@ -15,7 +19,8 @@ class PayableAccountPaymentResource extends JsonResource
         return [
             'id' => $this->id,
             'amount' => (float) $this->amount,
-            'payer' => $this->whenLoaded('payer', fn ($payer) => $payer->name),
+            'payer_id' => $this->payer_id,
+            'payer' => $this->whenLoaded('payer', fn (User $payer) => $payer->name),
             'period' => $this->period?->format('d-m-Y'),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

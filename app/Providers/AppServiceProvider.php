@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\PayableAccount\Contracts\Repositories\PayableAccountPaymentRepositoryInterface;
 use Modules\PayableAccount\Contracts\Repositories\PayableAccountRepositoryInterface;
+use Modules\PayableAccount\Models\PayableAccountPayment;
 use Modules\PayableAccount\Repositories\PayableAccountPaymentRepository;
 use Modules\PayableAccount\Repositories\PayableAccountRepository;
 
@@ -30,6 +32,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Route::bind('payment', fn (string $value) => PayableAccountPayment::findOrFail($value));
     }
 }

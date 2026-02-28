@@ -12,16 +12,33 @@ class AccountsSeeder extends Seeder
      */
     public function run(): void
     {
-        $accounts = ['Aluguel','Celes','Internet casa','Cartão Conan','Cartão Emilly', 'Transporte Conan', 'Transporte Emilly', 'Internet cell Emilly'
-        ,'Internet cell Conan', 'Unimed Conan','Comida / Flash', 'Uniodonto Conan'];
-        $insertData = [];
-        foreach ($accounts as $account) {
-            $insertData[] = [
-                'name' => $account,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+        $accounts = [
+            'Aluguel',
+            'Celesc',
+            'Internet Casa',
+            'Unimed',
+            'Uniodonto Conan',
+            'Cartão Conan',
+            'Cartão Emilly',
+            'Transporte Conan',
+            'Transporte Emilly',
+            'Internet Cell Conan',
+            'Internet Cell Emilly',
+            'Comida / Flash',
+            'Outros gastos',
+        ];
+
+        $accountData = array_map(fn ($name) => ['name' => $name], $accounts);
+
+        $existingNames = PayableAccount::query()
+            ->whereIn('name', $accounts)
+            ->pluck('name')
+            ->all();
+
+        $newAccounts = array_filter($accountData, fn ($account) => !in_array($account['name'], $existingNames));
+
+        if (!empty($newAccounts)) {
+            PayableAccount::query()->insert($newAccounts);
         }
-        PayableAccount::query()->insert($insertData);
     }
 }

@@ -7,5 +7,7 @@ uses(RefreshDatabase::class);
 test('payable account routes return 401 without token', function (): void {
     $response = $this->getJson('/api/payable-accounts');
 
-    $response->assertUnauthorized();
+    $response->assertUnauthorized()
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('meta.error', 'Unauthenticated.');
 });

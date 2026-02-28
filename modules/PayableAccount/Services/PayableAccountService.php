@@ -12,6 +12,9 @@ class PayableAccountService
         private readonly PayableAccountRepositoryInterface $repository
     ) {}
 
+    /**
+     * @return Collection<int, PayableAccount>
+     */
     public function list(string $period): Collection
     {
         return $this->repository->getAll($period);
@@ -22,11 +25,17 @@ class PayableAccountService
         return $this->repository->find($id);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function create(array $data): PayableAccount
     {
         return $this->repository->create($data);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function update(PayableAccount $payableAccount, array $data): PayableAccount
     {
         return $this->repository->update($payableAccount, $data);

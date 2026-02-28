@@ -4,12 +4,12 @@ namespace Modules\PayableAccount\Http\Requests;
 
 use Carbon\Carbon;
 use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
+use DateTimeInterface;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\PayableAccount\Models\PayableAccount;
 use Modules\PayableAccount\Models\PayableAccountPayment;
 
-class StorePayableAccountPaymentRequest extends FormRequest
+class UpdatePayableAccountPaymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -27,13 +27,18 @@ class StorePayableAccountPaymentRequest extends FormRequest
     }
 
     /**
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, array<int, string|Closure>>
      */
     public function rules(): array
     {
         $payableAccount = $this->route('payable_account');
+        $payment = $this->route('payment');
+
         assert($payableAccount instanceof PayableAccount);
+        assert($payment instanceof PayableAccountPayment);
+
         $payableAccountId = $payableAccount->id;
+        $paymentId = $payment->id;
 
         return [
             'amount' => ['required', 'numeric', 'min:0'],
@@ -41,13 +46,14 @@ class StorePayableAccountPaymentRequest extends FormRequest
             'period' => [
                 'required',
                 'date',
-                function (string $attribute, mixed $value, Closure $fail) use ($payableAccountId): void {
-                    $period = $value instanceof Carbon
-                        ? $value->format('Y-m-d')
-                        : Carbon::parse(is_string($value) ? $value : '')->format('Y-m-d');
+                function (string $attribute, mixed $period, Closure $fail) use ($payableAccountId, $paymentId): void {
+                    $periodValue = $period instanceof DateTimeInterface
+                        ? $period->format('Y-m-d')
+                        : (is_string($period) ? $period : '');
                     $exists = PayableAccountPayment::query()
                         ->where('payable_account_id', $payableAccountId)
-                        ->whereDate('period', $period)
+                        ->whereDate('period', $periodValue)
+                        ->where('id', '!=', $paymentId)
                         ->exists();
                     if ($exists) {
                         $fail(__('validation.unique', ['attribute' => $attribute]));

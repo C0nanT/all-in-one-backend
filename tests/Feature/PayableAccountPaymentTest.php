@@ -93,7 +93,9 @@ test('store payment returns 404 for non-existent payable account', function (): 
         'period' => '2026-02-01',
     ]);
 
-    $response->assertNotFound();
+    $response->assertNotFound()
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('meta.error', 'Resource not found.');
 });
 
 test('store payment fails when same period already exists for payable account', function (): void {
@@ -115,4 +117,118 @@ test('store payment fails when same period already exists for payable account', 
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrors(['period']);
+});
+
+test('can update payment for payable account', function (): void {
+    $payableAccount = PayableAccount::factory()->create();
+    $payer = User::factory()->create();
+    $otherPayer = User::factory()->create();
+
+    $payment = PayableAccountPayment::factory()->create([
+        'payable_account_id' => $payableAccount->id,
+        'payer_id' => $payer->id,
+        'amount' => 500,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->putJson(
+        "/api/payable-accounts/{$payableAccount->id}/payments/{$payment->id}",
+        [
+            'amount' => 1200.75,
+            'payer_id' => $otherPayer->id,
+            'period' => '2026-03-15',
+        ]
+    );
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.amount', 1200.75)
+        ->assertJsonPath('data.payer_id', $otherPayer->id)
+        ->assertJsonPath('data.period', '01-03-2026');
+
+    $payment->refresh();
+    expect((float) $payment->amount)->toBe(1200.75)
+        ->and($payment->payer_id)->toBe($otherPayer->id)
+        ->and($payment->period->format('Y-m-d'))->toBe('2026-03-01');
+});
+
+test('update payment can keep same period when editing other fields', function (): void {
+    $payableAccount = PayableAccount::factory()->create();
+    $payer = User::factory()->create();
+    $otherPayer = User::factory()->create();
+
+    $payment = PayableAccountPayment::factory()->create([
+        'payable_account_id' => $payableAccount->id,
+        'payer_id' => $payer->id,
+        'amount' => 500,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->putJson(
+        "/api/payable-accounts/{$payableAccount->id}/payments/{$payment->id}",
+        [
+            'amount' => 750,
+            'payer_id' => $otherPayer->id,
+            'period' => '2026-02-01',
+        ]
+    );
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.period', '01-02-2026');
+});
+
+test('update payment fails when period conflicts with another payment', function (): void {
+    $payableAccount = PayableAccount::factory()->create();
+    $payer = User::factory()->create();
+
+    $payment1 = PayableAccountPayment::factory()->create([
+        'payable_account_id' => $payableAccount->id,
+        'payer_id' => $payer->id,
+        'amount' => 100,
+        'period' => '2026-02-01',
+    ]);
+
+    $payment2 = PayableAccountPayment::factory()->create([
+        'payable_account_id' => $payableAccount->id,
+        'payer_id' => $payer->id,
+        'amount' => 200,
+        'period' => '2026-03-01',
+    ]);
+
+    $response = $this->putJson(
+        "/api/payable-accounts/{$payableAccount->id}/payments/{$payment2->id}",
+        [
+            'amount' => 250,
+            'payer_id' => $payer->id,
+            'period' => '2026-02-01',
+        ]
+    );
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['period']);
+});
+
+test('update payment returns 404 when payment belongs to different account', function (): void {
+    $account1 = PayableAccount::factory()->create();
+    $account2 = PayableAccount::factory()->create();
+    $payer = User::factory()->create();
+
+    $payment = PayableAccountPayment::factory()->create([
+        'payable_account_id' => $account1->id,
+        'payer_id' => $payer->id,
+        'amount' => 100,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->putJson(
+        "/api/payable-accounts/{$account2->id}/payments/{$payment->id}",
+        [
+            'amount' => 200,
+            'payer_id' => $payer->id,
+            'period' => '2026-02-01',
+        ]
+    );
+
+    $response->assertNotFound()
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('meta.error', 'Resource not found.');
 });

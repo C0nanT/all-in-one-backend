@@ -33,9 +33,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: all_in_one_backend
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: nB46s8zOALLeiv83hB7j6BUZNmtvt
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

@@ -26,7 +26,8 @@ class PayableAccountController extends Controller
     {
         $request->validate(['period' => ['required', 'date']]);
 
-        $accounts = $this->service->list($request->input('period'));
+        $period = $request->input('period');
+        $accounts = $this->service->list(is_string($period) ? $period : '');
 
         return PayableAccountResource::collection($accounts);
     }

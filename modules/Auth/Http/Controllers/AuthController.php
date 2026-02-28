@@ -34,13 +34,15 @@ class AuthController extends Controller
     {
         $user = User::query()->where('email', $request->validated('email'))->first();
 
-        if (! $user || ! Hash::check($request->validated('password'), $user->password)) {
+        $password = $request->validated('password');
+        if (!$user || !Hash::check(is_string($password) ? $password : '', $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
-        $token = $user->createToken($request->validated('device_name'))->plainTextToken;
+        $deviceName = $request->validated('device_name');
+        $token = $user->createToken(is_string($deviceName) ? $deviceName : 'default')->plainTextToken;
 
         return response()->json([
             'token' => $token,
@@ -49,7 +51,11 @@ class AuthController extends Controller
 
     public function logout(Request $request): \Illuminate\Http\Response
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if ($user === null) {
+            abort(401);
+        }
+        $user->currentAccessToken()->delete();
 
         return response()->noContent();
     }

@@ -119,7 +119,9 @@ test('shows a payable account', function (): void {
 test('show returns 404 for non-existent account', function (): void {
     $response = $this->getJson('/api/payable-accounts/99999');
 
-    $response->assertNotFound();
+    $response->assertNotFound()
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('meta.error', 'Resource not found.');
 });
 
 test('can update payable account', function (): void {
