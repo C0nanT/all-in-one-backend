@@ -22,6 +22,8 @@ class PayableAccountPaymentRepository implements PayableAccountPaymentRepository
     {
         $payment->update($data);
 
-        return $payment->fresh(['payer']);
+        $updated = $payment->fresh(['payer']);
+
+        return $updated ?? $payment;
     }
 }

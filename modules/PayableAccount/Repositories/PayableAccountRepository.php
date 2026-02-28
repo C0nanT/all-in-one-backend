@@ -55,11 +55,13 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
     {
         $payableAccount->update($data);
 
-        return $payableAccount->fresh();
+        $updated = $payableAccount->fresh();
+
+        return $updated ?? $payableAccount;
     }
 
     public function delete(PayableAccount $payableAccount): bool
     {
-        return $payableAccount->delete();
+        return (bool) $payableAccount->delete();
     }
 }

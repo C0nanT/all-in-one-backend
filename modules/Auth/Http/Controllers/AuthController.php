@@ -49,7 +49,11 @@ class AuthController extends Controller
 
     public function logout(Request $request): \Illuminate\Http\Response
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if ($user === null) {
+            abort(401);
+        }
+        $user->currentAccessToken()->delete();
 
         return response()->noContent();
     }
