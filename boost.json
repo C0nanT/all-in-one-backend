@@ -1,10 +1,19 @@
 {
-    "agents": ["cursor", "copilot"],
+    "agents": [
+        "cursor",
+        "copilot"
+    ],
     "guidelines": true,
     "herd_mcp": false,
     "mcp": true,
+    "modules": [
+        "User",
+        "Auth",
+        "PayableAccount"
+    ],
     "sail": false,
-    "skills": ["pest-testing"],
-    "structure": "modular",
-    "modules": ["User", "Auth", "PayableAccount"]
+    "skills": [
+        "pest-testing"
+    ],
+    "structure": "modular"
 }
