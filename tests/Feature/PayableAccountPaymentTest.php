@@ -93,7 +93,9 @@ test('store payment returns 404 for non-existent payable account', function (): 
         'period' => '2026-02-01',
     ]);
 
-    $response->assertNotFound();
+    $response->assertNotFound()
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('meta.error', 'Resource not found.');
 });
 
 test('store payment fails when same period already exists for payable account', function (): void {
@@ -226,5 +228,7 @@ test('update payment returns 404 when payment belongs to different account', fun
         ]
     );
 
-    $response->assertNotFound();
+    $response->assertNotFound()
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('meta.error', 'Resource not found.');
 });
