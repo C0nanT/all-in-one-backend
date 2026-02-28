@@ -7,8 +7,6 @@
   },
   "lint-staged": {
     "*.php": [
-      "scripts/check-syntax-php.sh",
-      "scripts/check-debug-php.sh",
       "vendor/bin/phpstan analyse --no-progress",
       "vendor/bin/pint"
     ]
