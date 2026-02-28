@@ -24,6 +24,9 @@ class UpdatePayableAccountPaymentRequest extends FormRequest
         }
     }
 
+    /**
+     * @return array<string, array<int, string|Closure>>
+     */
     public function rules(): array
     {
         $payableAccountId = $this->route('payable_account')->id;

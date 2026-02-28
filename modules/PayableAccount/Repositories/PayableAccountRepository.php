@@ -10,6 +10,9 @@ use Modules\PayableAccount\Models\PayableAccountPayment;
 
 class PayableAccountRepository implements PayableAccountRepositoryInterface
 {
+    /**
+     * @return Collection<int, PayableAccount>
+     */
     public function getAll(string $period): Collection
     {
         $start = Carbon::parse($period)->startOfMonth()->format('Y-m-d');
@@ -37,11 +40,17 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
         return PayableAccount::query()->find($id);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function create(array $data): PayableAccount
     {
         return PayableAccount::query()->create($data);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function update(PayableAccount $payableAccount, array $data): PayableAccount
     {
         $payableAccount->update($data);

@@ -12,6 +12,9 @@ class PayableAccountPaymentService
         private readonly PayableAccountPaymentRepositoryInterface $repository
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function create(PayableAccount $payableAccount, array $data): PayableAccountPayment
     {
         $data['payable_account_id'] = $payableAccount->id;
@@ -19,6 +22,9 @@ class PayableAccountPaymentService
         return $this->repository->create($data);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function update(PayableAccountPayment $payment, array $data): PayableAccountPayment
     {
         return $this->repository->update($payment, $data);

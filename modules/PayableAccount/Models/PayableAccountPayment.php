@@ -14,9 +14,12 @@ use Modules\User\Models\User;
  */
 class PayableAccountPayment extends Model
 {
+    /** @use HasFactory<\Database\Factories\PayableAccountPaymentFactory> */
     use HasFactory, SoftDeletes;
 
-    /** @use HasFactory<PayableAccountPaymentFactory> */
+    /**
+     * @return \Illuminate\Database\Eloquent\Factories\Factory<PayableAccountPayment>
+     */
     protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
     {
         return PayableAccountPaymentFactory::new();
@@ -47,13 +50,21 @@ class PayableAccountPayment extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<PayableAccount, PayableAccountPayment>
+     */
     public function payableAccount(): BelongsTo
     {
+        /** @phpstan-ignore-next-line return.type (TDeclaringModel not covariant) */
         return $this->belongsTo(PayableAccount::class, 'payable_account_id');
     }
 
+    /**
+     * @return BelongsTo<User, PayableAccountPayment>
+     */
     public function payer(): BelongsTo
     {
+        /** @phpstan-ignore-next-line return.type */
         return $this->belongsTo(User::class, 'payer_id');
     }
 }

@@ -5,4 +5,4 @@ parameters:
     paths:
         - app/
         - modules/
-    level: 5
+    level: 6
