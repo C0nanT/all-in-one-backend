@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\User\Models\User;
 
+/**
+ * @property \Carbon\Carbon|null $period
+ */
 class PayableAccountPayment extends Model
 {
     use HasFactory, SoftDeletes;
