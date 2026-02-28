@@ -35,9 +35,9 @@ class AccountsSeeder extends Seeder
             ->pluck('name')
             ->all();
 
-        $newAccounts = array_filter($accountData, fn ($account) => ! in_array($account['name'], $existingNames));
+        $newAccounts = array_filter($accountData, fn ($account) => !in_array($account['name'], $existingNames));
 
-        if (! empty($newAccounts)) {
+        if (!empty($newAccounts)) {
             PayableAccount::query()->insert($newAccounts);
         }
     }

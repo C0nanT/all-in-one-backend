@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('api/*')) {
                 $rawMessage = $e->getMessage();
                 $isLaravelModelNotFound = str_contains($rawMessage, 'No query results for model');
-                $message = ($rawMessage !== '' && ! $isLaravelModelNotFound)
+                $message = ($rawMessage !== '' && !$isLaravelModelNotFound)
                     ? $rawMessage
                     : 'Resource not found.';
 
@@ -42,7 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 $status = $e->getStatusCode();
                 $message = $e->getMessage();
 
-                if ($status >= 500 && ! config('app.debug')) {
+                if ($status >= 500 && !config('app.debug')) {
                     $message = 'An unexpected error occurred. Please try again later.';
                 } elseif ($message === '') {
                     $message = match ($status) {
