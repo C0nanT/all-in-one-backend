@@ -5,6 +5,8 @@ use Modules\PayableAccount\Http\Controllers\PayableAccountController;
 use Modules\PayableAccount\Http\Controllers\PayableAccountPaymentController;
 
 Route::middleware('auth:sanctum')->group(function (): void {
+    Route::get('payable-accounts/counts', [PayableAccountController::class, 'counts'])
+        ->name('payable-accounts.counts');
     Route::apiResource('payable-accounts', PayableAccountController::class);
     Route::post('payable-accounts/{payable_account}/payments', [PayableAccountPaymentController::class, 'store'])
         ->name('payable-accounts.payments.store');

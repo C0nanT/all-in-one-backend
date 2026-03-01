@@ -12,6 +12,16 @@ interface PayableAccountRepositoryInterface
      */
     public function getAll(string $period): Collection;
 
+    /**
+     * @return array{month_total: float, paid_by_user: array<int, array{user_id: int, name: string, total_paid: float}>}
+     */
+    public function getSummary(string $period): array;
+
+    /**
+     * @return array{paid: int, unpaid: int}
+     */
+    public function getPaidUnpaidCounts(string $period): array;
+
     public function find(int $id): ?PayableAccount;
 
     /**

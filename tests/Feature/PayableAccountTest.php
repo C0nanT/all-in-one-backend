@@ -24,6 +24,7 @@ test('index returns all payable accounts', function (): void {
             'data' => [
                 '*' => ['id', 'name', 'status', 'payment', 'created_at', 'updated_at'],
             ],
+            'summary' => ['period', 'month_total', 'paid_by_user'],
         ]);
 });
 
@@ -31,7 +32,9 @@ test('index returns empty when there are no accounts', function (): void {
     $response = $this->getJson('/api/payable-accounts?period=2026-01');
 
     $response->assertSuccessful()
-        ->assertJsonPath('data', []);
+        ->assertJsonPath('data', [])
+        ->assertJsonPath('summary.month_total', 0)
+        ->assertJsonPath('summary.paid_by_user', []);
 });
 
 test('index filters payments by period when period query param is passed', function (): void {
@@ -58,6 +61,22 @@ test('index filters payments by period when period query param is passed', funct
     expect((float) $response->json('data.0.payment.amount'))->toBe(200.0);
 });
 
+test('index returns status paid_zero when payment amount is zero', function (): void {
+    $account = PayableAccount::factory()->create(['name' => 'Zero amount account']);
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account->id,
+        'amount' => 0,
+        'payer_id' => $this->user->id,
+        'period' => '2026-01-01',
+    ]);
+
+    $response = $this->getJson('/api/payable-accounts?period=2026-01');
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.0.status', 'paid_zero');
+    expect((float) $response->json('data.0.payment.amount'))->toBe(0.0);
+});
+
 test('index returns payment for period when period query param is passed', function (): void {
     $account = PayableAccount::factory()->create();
     PayableAccountPayment::query()->create([
@@ -77,6 +96,84 @@ test('index returns payment for period when period query param is passed', funct
 
     $response->assertSuccessful();
     expect((float) $response->json('data.0.payment.amount'))->toBe(200.0);
+});
+
+test('index returns summary with month_total and paid_by_user', function (): void {
+    $payer1 = User::factory()->create(['name' => 'Alice']);
+    $payer2 = User::factory()->create(['name' => 'Bob']);
+
+    $account1 = PayableAccount::factory()->create();
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account1->id,
+        'amount' => 150.50,
+        'payer_id' => $payer1->id,
+        'period' => '2026-02-01',
+    ]);
+
+    $account2 = PayableAccount::factory()->create();
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account2->id,
+        'amount' => 299.50,
+        'payer_id' => $payer2->id,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->getJson('/api/payable-accounts?period=2026-02');
+
+    $response->assertSuccessful()
+        ->assertJsonPath('summary.period', '2026-02')
+        ->assertJsonPath('summary.month_total', 450)
+        ->assertJsonCount(2, 'summary.paid_by_user');
+
+    $paidByUser = $response->json('summary.paid_by_user');
+    expect($paidByUser)->toBeArray();
+
+    $alice = collect($paidByUser)->firstWhere('user_id', $payer1->id);
+    $bob = collect($paidByUser)->firstWhere('user_id', $payer2->id);
+    expect($alice)->toMatchArray(['user_id' => $payer1->id, 'name' => 'Alice', 'total_paid' => 150.50])
+        ->and($bob)->toMatchArray(['user_id' => $payer2->id, 'name' => 'Bob', 'total_paid' => 299.50]);
+});
+
+test('index summary aggregates multiple payments by same payer', function (): void {
+    $payer = User::factory()->create(['name' => 'Carol']);
+
+    $account1 = PayableAccount::factory()->create();
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account1->id,
+        'amount' => 100,
+        'payer_id' => $payer->id,
+        'period' => '2026-02-01',
+    ]);
+
+    $account2 = PayableAccount::factory()->create();
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account2->id,
+        'amount' => 50,
+        'payer_id' => $payer->id,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->getJson('/api/payable-accounts?period=2026-02');
+
+    $response->assertSuccessful()
+        ->assertJsonPath('summary.month_total', 150)
+        ->assertJsonCount(1, 'summary.paid_by_user')
+        ->assertJsonPath('summary.paid_by_user.0', [
+            'user_id' => $payer->id,
+            'name' => 'Carol',
+            'total_paid' => 150,
+        ]);
+});
+
+test('index summary returns zero month_total and empty paid_by_user when no payments', function (): void {
+    PayableAccount::factory()->count(2)->create();
+
+    $response = $this->getJson('/api/payable-accounts?period=2026-01');
+
+    $response->assertSuccessful()
+        ->assertJsonPath('summary.period', '2026-01')
+        ->assertJsonPath('summary.month_total', 0)
+        ->assertJsonPath('summary.paid_by_user', []);
 });
 
 test('index returns 422 when period query param is invalid', function (): void {

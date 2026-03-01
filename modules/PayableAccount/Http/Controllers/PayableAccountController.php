@@ -3,6 +3,7 @@
 namespace Modules\PayableAccount\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -22,14 +23,37 @@ class PayableAccountController extends Controller
     /**
      * @throws ValidationException
      */
+    public function counts(Request $request): JsonResponse
+    {
+        $request->validate(['period' => ['required', 'date']]);
+
+        $period = $request->input('period');
+        $periodString = is_string($period) ? $period : '';
+
+        $counts = $this->service->getPaidUnpaidCounts($periodString);
+
+        return response()->json(['data' => $counts]);
+    }
+
+    /**
+     * @throws ValidationException
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $request->validate(['period' => ['required', 'date']]);
 
         $period = $request->input('period');
-        $accounts = $this->service->list(is_string($period) ? $period : '');
+        $periodString = is_string($period) ? $period : '';
 
-        return PayableAccountResource::collection($accounts);
+        $accounts = $this->service->list($periodString);
+        $summary = $this->service->getSummary($periodString);
+
+        $summaryWithPeriod = array_merge($summary, [
+            'period' => Carbon::parse($periodString)->format('Y-m'),
+        ]);
+
+        return PayableAccountResource::collection($accounts)
+            ->additional(['summary' => $summaryWithPeriod]);
     }
 
     public function store(StorePayableAccountRequest $request): JsonResponse

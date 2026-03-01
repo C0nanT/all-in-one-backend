@@ -6,8 +6,15 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.php": [
+    "app/**/*.php": [
       "vendor/bin/phpstan analyse --no-progress",
+      "vendor/bin/pint"
+    ],
+    "modules/**/*.php": [
+      "vendor/bin/phpstan analyse --no-progress",
+      "vendor/bin/pint"
+    ],
+    "*.php": [
       "vendor/bin/pint"
     ]
   },

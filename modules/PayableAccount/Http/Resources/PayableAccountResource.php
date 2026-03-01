@@ -15,11 +15,14 @@ class PayableAccountResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $payment = $this->relationLoaded('payments') ? $this->payments->first() : null;
+        $status = !$payment ? 'unpaid' : ((float) $payment->amount > 0 ? 'paid' : 'paid_zero');
+
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'status' => $this->relationLoaded('payments') ? ($this->payments->first() ? 'paid' : 'unpaid') : 'unpaid',
-            'payment' => $this->relationLoaded('payments') ? ($this->payments->first() ? new PayableAccountPaymentResource($this->payments->first()) : null) : null,
+            'status' => $status,
+            'payment' => $payment ? new PayableAccountPaymentResource($payment) : null,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

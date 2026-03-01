@@ -11,3 +11,9 @@ test('payable account routes return 401 without token', function (): void {
         ->assertJsonPath('data', [])
         ->assertJsonPath('meta.error', 'Unauthenticated.');
 });
+
+test('payable account counts route returns 401 without token', function (): void {
+    $response = $this->getJson('/api/payable-accounts/counts?period=2026-01');
+
+    $response->assertUnauthorized();
+});
