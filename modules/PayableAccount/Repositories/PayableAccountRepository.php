@@ -86,6 +86,35 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
         ];
     }
 
+    /**
+     * @return array{paid: int, unpaid: int}
+     */
+    public function getPaidUnpaidCounts(string $period): array
+    {
+        $start = Carbon::parse($period)->startOfMonth()->format('Y-m-d');
+        $end = Carbon::parse($period)->endOfMonth()->format('Y-m-d');
+
+        $latestPaymentIdSubquery = PayableAccountPayment::query()
+            ->selectRaw('MAX(id)')
+            ->whereBetween('period', [$start, $end])
+            ->groupBy('payable_account_id', 'period');
+
+        $cnt = PayableAccountPayment::query()
+            ->whereIn('id', $latestPaymentIdSubquery)
+            ->selectRaw('COUNT(DISTINCT payable_account_id) as cnt')
+            ->value('cnt');
+
+        /** @var int|float|string|null $cnt */
+        $paid = (int) ($cnt ?? 0);
+
+        $total = (int) PayableAccount::query()->count();
+
+        return [
+            'paid' => $paid,
+            'unpaid' => max(0, $total - $paid),
+        ];
+    }
+
     public function find(int $id): ?PayableAccount
     {
         return PayableAccount::query()->find($id);

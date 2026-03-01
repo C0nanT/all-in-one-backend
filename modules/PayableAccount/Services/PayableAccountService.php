@@ -28,6 +28,14 @@ class PayableAccountService
         return $this->repository->getSummary($period);
     }
 
+    /**
+     * @return array{paid: int, unpaid: int}
+     */
+    public function getPaidUnpaidCounts(string $period): array
+    {
+        return $this->repository->getPaidUnpaidCounts($period);
+    }
+
     public function find(int $id): ?PayableAccount
     {
         return $this->repository->find($id);

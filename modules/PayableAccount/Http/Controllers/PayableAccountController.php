@@ -23,6 +23,21 @@ class PayableAccountController extends Controller
     /**
      * @throws ValidationException
      */
+    public function counts(Request $request): JsonResponse
+    {
+        $request->validate(['period' => ['required', 'date']]);
+
+        $period = $request->input('period');
+        $periodString = is_string($period) ? $period : '';
+
+        $counts = $this->service->getPaidUnpaidCounts($periodString);
+
+        return response()->json(['data' => $counts]);
+    }
+
+    /**
+     * @throws ValidationException
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $request->validate(['period' => ['required', 'date']]);
