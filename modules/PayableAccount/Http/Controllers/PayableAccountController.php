@@ -30,7 +30,7 @@ class PayableAccountController extends Controller
         $period = $request->input('period');
         $periodString = is_string($period) ? $period : '';
 
-        $counts = $this->service->getPaidUnpaidCounts($periodString);
+        $counts = $this->service->getPaidUnpaidPaidZeroCounts($periodString);
 
         return response()->json(['data' => $counts]);
     }

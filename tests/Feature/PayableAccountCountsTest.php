@@ -27,7 +27,8 @@ test('counts returns paid and unpaid for period with mixed accounts', function (
 
     $response->assertSuccessful()
         ->assertJsonPath('data.paid', 1)
-        ->assertJsonPath('data.unpaid', 1);
+        ->assertJsonPath('data.unpaid', 1)
+        ->assertJsonPath('data.paid_zero', 0);
 });
 
 test('counts returns all unpaid when no payments in period', function (): void {
@@ -37,10 +38,11 @@ test('counts returns all unpaid when no payments in period', function (): void {
 
     $response->assertSuccessful()
         ->assertJsonPath('data.paid', 0)
-        ->assertJsonPath('data.unpaid', 3);
+        ->assertJsonPath('data.unpaid', 3)
+        ->assertJsonPath('data.paid_zero', 0);
 });
 
-test('counts returns all paid when all accounts have payments in period', function (): void {
+test('counts returns paid, paid_zero and unpaid when accounts have mixed payment amounts', function (): void {
     $account1 = PayableAccount::factory()->create();
     PayableAccountPayment::query()->create([
         'payable_account_id' => $account1->id,
@@ -59,7 +61,8 @@ test('counts returns all paid when all accounts have payments in period', functi
     $response = $this->getJson('/api/payable-accounts/counts?period=2026-02');
 
     $response->assertSuccessful()
-        ->assertJsonPath('data.paid', 2)
+        ->assertJsonPath('data.paid', 1)
+        ->assertJsonPath('data.paid_zero', 1)
         ->assertJsonPath('data.unpaid', 0);
 });
 
@@ -82,7 +85,8 @@ test('counts uses latest payment when account has multiple in period', function 
 
     $response->assertSuccessful()
         ->assertJsonPath('data.paid', 1)
-        ->assertJsonPath('data.unpaid', 0);
+        ->assertJsonPath('data.unpaid', 0)
+        ->assertJsonPath('data.paid_zero', 0);
 });
 
 test('counts filters by period and ignores other months', function (): void {
@@ -105,7 +109,25 @@ test('counts filters by period and ignores other months', function (): void {
 
     $response->assertSuccessful()
         ->assertJsonPath('data.paid', 1)
-        ->assertJsonPath('data.unpaid', 1);
+        ->assertJsonPath('data.unpaid', 1)
+        ->assertJsonPath('data.paid_zero', 0);
+});
+
+test('counts returns paid_zero when account has payment with amount zero', function (): void {
+    $account = PayableAccount::factory()->create();
+    PayableAccountPayment::query()->create([
+        'payable_account_id' => $account->id,
+        'amount' => 0,
+        'payer_id' => null,
+        'period' => '2026-02-01',
+    ]);
+
+    $response = $this->getJson('/api/payable-accounts/counts?period=2026-02');
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.paid', 0)
+        ->assertJsonPath('data.paid_zero', 1)
+        ->assertJsonPath('data.unpaid', 0);
 });
 
 test('counts returns 422 when period is missing', function (): void {

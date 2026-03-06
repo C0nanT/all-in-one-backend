@@ -87,9 +87,9 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
     }
 
     /**
-     * @return array{paid: int, unpaid: int}
+     * @return array{paid: int, unpaid: int, paid_zero: int}
      */
-    public function getPaidUnpaidCounts(string $period): array
+    public function getPaidUnpaidPaidZeroCounts(string $period): array
     {
         $start = Carbon::parse($period)->startOfMonth()->format('Y-m-d');
         $end = Carbon::parse($period)->endOfMonth()->format('Y-m-d');
@@ -99,19 +99,31 @@ class PayableAccountRepository implements PayableAccountRepositoryInterface
             ->whereBetween('period', [$start, $end])
             ->groupBy('payable_account_id', 'period');
 
-        $cnt = PayableAccountPayment::query()
+        /** @var int|string|null $paidCnt */
+        $paidCnt = PayableAccountPayment::query()
             ->whereIn('id', $latestPaymentIdSubquery)
+            ->where('amount', '>', 0)
             ->selectRaw('COUNT(DISTINCT payable_account_id) as cnt')
             ->value('cnt');
+        $paid = (int) ($paidCnt ?? 0);
 
-        /** @var int|float|string|null $cnt */
-        $paid = (int) ($cnt ?? 0);
+        /** @var int|string|null $paidZeroCnt */
+        $paidZeroCnt = PayableAccountPayment::query()
+            ->whereIn('id', $latestPaymentIdSubquery)
+            ->where(function ($q): void {
+                $q->where('amount', 0)->orWhereNull('amount');
+            })
+            ->selectRaw('COUNT(DISTINCT payable_account_id) as cnt')
+            ->value('cnt');
+        $paidZero = (int) ($paidZeroCnt ?? 0);
 
         $total = (int) PayableAccount::query()->count();
+        $unpaid = max(0, $total - $paid - $paidZero);
 
         return [
             'paid' => $paid,
-            'unpaid' => max(0, $total - $paid),
+            'unpaid' => $unpaid,
+            'paid_zero' => $paidZero,
         ];
     }
 
