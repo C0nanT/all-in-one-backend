@@ -18,9 +18,9 @@ interface PayableAccountRepositoryInterface
     public function getSummary(string $period): array;
 
     /**
-     * @return array{paid: int, unpaid: int}
+     * @return array{paid: int, unpaid: int, paid_zero: int}
      */
-    public function getPaidUnpaidCounts(string $period): array;
+    public function getPaidUnpaidPaidZeroCounts(string $period): array;
 
     public function find(int $id): ?PayableAccount;
 

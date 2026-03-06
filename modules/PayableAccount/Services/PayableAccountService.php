@@ -29,11 +29,11 @@ class PayableAccountService
     }
 
     /**
-     * @return array{paid: int, unpaid: int}
+     * @return array{paid: int, unpaid: int, paid_zero: int}
      */
-    public function getPaidUnpaidCounts(string $period): array
+    public function getPaidUnpaidPaidZeroCounts(string $period): array
     {
-        return $this->repository->getPaidUnpaidCounts($period);
+        return $this->repository->getPaidUnpaidPaidZeroCounts($period);
     }
 
     public function find(int $id): ?PayableAccount

@@ -4,7 +4,7 @@
 fix-permissions:
 	docker compose exec app sh -c 'chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && chmod -R 777 /var/www/storage /var/www/bootstrap/cache'
 
-sh-app:
+sh:
 	docker compose exec app sh
 
 sh-nginx:
