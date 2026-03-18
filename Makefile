@@ -16,6 +16,9 @@ sh-postgres:
 up:
 	docker compose up -d
 
+migrate:
+	docker compose exec app php artisan migrate
+
 down:
 	docker compose down
 
