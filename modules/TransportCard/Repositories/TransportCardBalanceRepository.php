@@ -8,9 +8,10 @@ use Modules\TransportCard\Models\TransportCardBalance;
 
 class TransportCardBalanceRepository implements TransportCardBalanceRepositoryInterface
 {
-    public function getForDate(Carbon $date): ?TransportCardBalance
+    public function getForDate(int $transportCardId, Carbon $date): ?TransportCardBalance
     {
         return TransportCardBalance::query()
+            ->where('transport_card_id', $transportCardId)
             ->whereDate('snapshot_date', $date)
             ->first();
     }
@@ -18,13 +19,15 @@ class TransportCardBalanceRepository implements TransportCardBalanceRepositoryIn
     /**
      * @param  array<string, mixed>|null  $raw
      */
-    public function upsertForDate(Carbon $date, float $balance, string $cardNumber, ?array $raw = null): TransportCardBalance
+    public function upsertForDate(int $transportCardId, Carbon $date, float $balance, string $cardNumber, ?array $raw = null): TransportCardBalance
     {
         $record = TransportCardBalance::query()
+            ->where('transport_card_id', $transportCardId)
             ->whereDate('snapshot_date', $date)
             ->first();
 
         $data = [
+            'transport_card_id' => $transportCardId,
             'snapshot_date' => $date->format('Y-m-d'),
             'balance' => $balance,
             'card_number' => $cardNumber,

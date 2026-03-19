@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 
 class TacomApiService
 {
-    public function login(): string
+    public function login(string $username, string $password): string
     {
         $baseUrl = config('tacom.base_url');
         $authPath = config('tacom.auth_path');
@@ -14,16 +14,6 @@ class TacomApiService
             throw new \RuntimeException('Invalid Tacom API configuration: base_url and auth_path must be strings');
         }
         $url = $baseUrl.$authPath;
-
-        $credentials = config('services.tacom');
-        if (!is_array($credentials)) {
-            throw new \RuntimeException('Invalid Tacom API configuration: services.tacom must be an array');
-        }
-
-        $username = $credentials['username'] ?? '';
-        $password = $credentials['password'] ?? '';
-        $username = is_string($username) ? $username : '';
-        $password = is_string($password) ? $password : '';
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
@@ -55,23 +45,13 @@ class TacomApiService
     /**
      * @return array<string, mixed>
      */
-    public function findCartao(string $accessToken): array
+    public function findCartao(string $accessToken, string $cardNumber, string $cpf): array
     {
         $baseUrl = config('tacom.base_url');
         $path = config('tacom.find_cartao_path');
         if (!is_string($baseUrl) || !is_string($path)) {
             throw new \RuntimeException('Invalid Tacom API configuration: base_url and find_cartao_path must be strings');
         }
-
-        $credentials = config('services.tacom');
-        if (!is_array($credentials)) {
-            throw new \RuntimeException('Invalid Tacom API configuration: services.tacom must be an array');
-        }
-
-        $cardNumber = $credentials['card_number'] ?? '';
-        $cpf = $credentials['cpf'] ?? '';
-        $cardNumber = is_string($cardNumber) ? $cardNumber : '';
-        $cpf = is_string($cpf) ? $cpf : '';
 
         $url = "{$baseUrl}{$path}/{$cardNumber}/0/{$cpf}";
 

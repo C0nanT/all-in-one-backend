@@ -4,6 +4,7 @@ namespace Modules\TransportCard\Services;
 
 use Carbon\Carbon;
 use Modules\TransportCard\Contracts\Repositories\TransportCardBalanceRepositoryInterface;
+use Modules\TransportCard\Models\TransportCard;
 use Modules\TransportCard\Models\TransportCardBalance;
 
 class TransportCardService
@@ -16,32 +17,28 @@ class TransportCardService
     /**
      * @return array{balance: float, updated_at: string, from_cache: bool, card_number: string, last_used_at?: string|null, owner_name?: string|null}
      */
-    public function getBalance(bool $forceRefresh = false): array
+    public function getBalance(TransportCard $transportCard, bool $forceRefresh = false): array
     {
         $today = Carbon::today();
 
         if (!$forceRefresh) {
-            $cached = $this->repository->getForDate($today);
+            $cached = $this->repository->getForDate($transportCard->id, $today);
 
             if ($cached !== null) {
                 return $this->formatResponse($cached, true);
             }
         }
 
-        $accessToken = $this->tacomApi->login();
-        $data = $this->tacomApi->findCartao($accessToken);
+        $accessToken = $this->tacomApi->login($transportCard->username, $transportCard->password);
+        $data = $this->tacomApi->findCartao($accessToken, $transportCard->card_number, $transportCard->cpf);
 
         $balance = $this->extractBalance($data);
 
-        $credentials = config('services.tacom');
-        if (!is_array($credentials)) {
-            throw new \RuntimeException('Invalid Tacom API configuration: services.tacom must be an array');
-        }
-
-        $cardNumber = $data['codExternoCartao'] ?? $credentials['card_number'] ?? '';
+        $cardNumber = $data['codExternoCartao'] ?? $transportCard->card_number ?? '';
         $cardNumber = is_string($cardNumber) ? $cardNumber : '';
 
         $record = $this->repository->upsertForDate(
+            $transportCard->id,
             $today,
             $balance,
             $cardNumber,

@@ -6,38 +6,143 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
+use Modules\TransportCard\Models\TransportCard;
 use Modules\TransportCard\Models\TransportCardBalance;
 use Modules\User\Models\User;
 
 uses(RefreshDatabase::class);
 
-// Testes desativados para evitar flood de requisições para a API, sem previsão de uso.
+// Testes desativados para evitar quebra da API, atenção para não criar mais testes dessa feature
 
 // beforeEach(function (): void {
 //     Config::set('tacom.base_url', 'https://tacom-test.example.com');
-//     Config::set('services.tacom', [
-//         'username' => 'test-user',
-//         'password' => 'test-pass',
-//         'card_number' => '036200002681705',
-//         'cpf' => '04357575125',
-//     ]);
 // });
 
-// describe('when authenticated', function (): void {
+// describe('CRUD', function (): void {
 //     beforeEach(function (): void {
 //         $this->user = User::factory()->create();
 //         Sanctum::actingAs($this->user, ['*']);
 //     });
 
+//     test('index returns empty collection when no cards', function (): void {
+//         $response = $this->getJson('/api/transport-cards');
+
+//         $response->assertSuccessful()
+//             ->assertJsonPath('data', []);
+//     });
+
+//     test('index returns transport cards', function (): void {
+//         $card = TransportCard::factory()->create(['name' => 'My Card']);
+
+//         $response = $this->getJson('/api/transport-cards');
+
+//         $response->assertSuccessful()
+//             ->assertJsonPath('data.0.id', $card->id)
+//             ->assertJsonPath('data.0.name', 'My Card')
+//             ->assertJsonPath('data.0.username', $card->username)
+//             ->assertJsonPath('data.0.card_number', $card->card_number)
+//             ->assertJsonPath('data.0.cpf', $card->cpf)
+//             ->assertJsonMissingPath('data.0.password');
+//     });
+
+//     test('store creates transport card', function (): void {
+//         $payload = [
+//             'name' => 'New Card',
+//             'username' => 'user1',
+//             'password' => 'secret123',
+//             'card_number' => '036200002681705',
+//             'cpf' => '04357575125',
+//         ];
+
+//         $response = $this->postJson('/api/transport-cards', $payload);
+
+//         $response->assertCreated()
+//             ->assertJsonPath('data.name', 'New Card')
+//             ->assertJsonPath('data.username', 'user1')
+//             ->assertJsonPath('data.card_number', '036200002681705')
+//             ->assertJsonPath('data.cpf', '04357575125')
+//             ->assertJsonMissingPath('data.password');
+
+//         $this->assertDatabaseHas('transport_cards', [
+//             'name' => 'New Card',
+//             'username' => 'user1',
+//             'card_number' => '036200002681705',
+//             'cpf' => '04357575125',
+//         ]);
+//     });
+
+//     test('store validates required fields', function (): void {
+//         $response = $this->postJson('/api/transport-cards', []);
+
+//         $response->assertUnprocessable()
+//             ->assertJsonValidationErrors(['name', 'username', 'password', 'card_number', 'cpf']);
+//     });
+
+//     test('show returns transport card', function (): void {
+//         $card = TransportCard::factory()->create(['name' => 'Show Card']);
+
+//         $response = $this->getJson("/api/transport-cards/{$card->id}");
+
+//         $response->assertSuccessful()
+//             ->assertJsonPath('data.id', $card->id)
+//             ->assertJsonPath('data.name', 'Show Card')
+//             ->assertJsonMissingPath('data.password');
+//     });
+
+//     test('show returns 404 when card not found', function (): void {
+//         $response = $this->getJson('/api/transport-cards/99999');
+
+//         $response->assertNotFound();
+//     });
+
+//     test('update modifies transport card', function (): void {
+//         $card = TransportCard::factory()->create(['name' => 'Original']);
+
+//         $response = $this->putJson("/api/transport-cards/{$card->id}", [
+//             'name' => 'Updated Name',
+//         ]);
+
+//         $response->assertSuccessful()
+//             ->assertJsonPath('data.name', 'Updated Name');
+
+//         $this->assertDatabaseHas('transport_cards', [
+//             'id' => $card->id,
+//             'name' => 'Updated Name',
+//         ]);
+//     });
+
+//     test('destroy deletes transport card', function (): void {
+//         $card = TransportCard::factory()->create();
+
+//         $response = $this->deleteJson("/api/transport-cards/{$card->id}");
+
+//         $response->assertNoContent();
+//         $this->assertDatabaseMissing('transport_cards', ['id' => $card->id]);
+//     });
+// });
+
+// describe('balance and refresh when authenticated', function (): void {
+//     beforeEach(function (): void {
+//         $this->user = User::factory()->create();
+//         Sanctum::actingAs($this->user, ['*']);
+//         $this->card = TransportCard::factory()->create([
+//             'username' => 'test-user',
+//             'password' => 'test-pass',
+//             'card_number' => '036200002681705',
+//             'cpf' => '04357575125',
+//         ]);
+//     });
+
 //     test('get balance returns from cache when record exists for today', function (): void {
 //         TransportCardBalance::query()->create([
+//             'transport_card_id' => $this->card->id,
 //             'snapshot_date' => Carbon::today(),
 //             'balance' => 50.00,
 //             'card_number' => '03620000268170',
 //             'raw_response' => null,
 //         ]);
 
-//         $response = $this->getJson('/api/transport-card/balance');
+//         $response = $this->getJson("/api/transport-cards/{$this->card->id}/balance");
 
 //         $response->assertSuccessful()
 //             ->assertJsonPath('balance', 50)
@@ -69,7 +174,7 @@ uses(RefreshDatabase::class);
 //             return Http::response('Not found', 404);
 //         });
 
-//         $response = $this->getJson('/api/transport-card/balance');
+//         $response = $this->getJson("/api/transport-cards/{$this->card->id}/balance");
 
 //         $response->assertSuccessful()
 //             ->assertJsonPath('balance', 23.09)
@@ -78,11 +183,15 @@ uses(RefreshDatabase::class);
 //             ->assertJsonPath('owner_name', 'CONAN CAMPOS SOUZA TORRES')
 //             ->assertJsonStructure(['balance', 'updated_at', 'from_cache', 'card_number', 'last_used_at', 'owner_name']);
 
-//         $this->assertDatabaseHas('transport_card_balances', ['balance' => 23.09]);
+//         $this->assertDatabaseHas('transport_card_balances', [
+//             'transport_card_id' => $this->card->id,
+//             'balance' => 23.09,
+//         ]);
 //     });
 
 //     test('get balance with refresh=1 forces api fetch even when cache exists', function (): void {
 //         TransportCardBalance::query()->create([
+//             'transport_card_id' => $this->card->id,
 //             'snapshot_date' => Carbon::today(),
 //             'balance' => 10.00,
 //             'card_number' => '03620000268170',
@@ -108,7 +217,7 @@ uses(RefreshDatabase::class);
 //             return Http::response('Not found', 404);
 //         });
 
-//         $response = $this->getJson('/api/transport-card/balance?refresh=1');
+//         $response = $this->getJson("/api/transport-cards/{$this->card->id}/balance?refresh=1");
 
 //         $response->assertSuccessful()
 //             ->assertJsonPath('balance', 99.50)
@@ -116,11 +225,15 @@ uses(RefreshDatabase::class);
 //             ->assertJsonPath('card_number', '03620000268170')
 //             ->assertJsonPath('owner_name', 'CONAN CAMPOS SOUZA TORRES');
 
-//         $this->assertDatabaseHas('transport_card_balances', ['balance' => 99.50]);
+//         $this->assertDatabaseHas('transport_card_balances', [
+//             'transport_card_id' => $this->card->id,
+//             'balance' => 99.50,
+//         ]);
 //     });
 
 //     test('post refresh always fetches from api and updates cache', function (): void {
 //         TransportCardBalance::query()->create([
+//             'transport_card_id' => $this->card->id,
 //             'snapshot_date' => Carbon::today(),
 //             'balance' => 5.00,
 //             'card_number' => '03620000268170',
@@ -146,7 +259,7 @@ uses(RefreshDatabase::class);
 //             return Http::response('Not found', 404);
 //         });
 
-//         $response = $this->postJson('/api/transport-card/refresh');
+//         $response = $this->postJson("/api/transport-cards/{$this->card->id}/refresh");
 
 //         $response->assertSuccessful()
 //             ->assertJsonPath('balance', 42.75)
@@ -154,7 +267,10 @@ uses(RefreshDatabase::class);
 //             ->assertJsonPath('card_number', '03620000268170')
 //             ->assertJsonPath('owner_name', 'CONAN CAMPOS SOUZA TORRES');
 
-//         $this->assertDatabaseHas('transport_card_balances', ['balance' => 42.75]);
+//         $this->assertDatabaseHas('transport_card_balances', [
+//             'transport_card_id' => $this->card->id,
+//             'balance' => 42.75,
+//         ]);
 //     });
 
 //     test('balance returns 502 when tacom api fails', function (): void {
@@ -162,7 +278,7 @@ uses(RefreshDatabase::class);
 //             '*' => Http::response('Server Error', 500),
 //         ]);
 
-//         $response = $this->getJson('/api/transport-card/balance');
+//         $response = $this->getJson("/api/transport-cards/{$this->card->id}/balance");
 
 //         $response->assertStatus(502)
 //             ->assertJsonPath('message', 'Unable to fetch transport card balance. Please try again later.');
@@ -173,26 +289,30 @@ uses(RefreshDatabase::class);
 //             '*' => Http::response('Server Error', 500),
 //         ]);
 
-//         $response = $this->postJson('/api/transport-card/refresh');
+//         $response = $this->postJson("/api/transport-cards/{$this->card->id}/refresh");
 
 //         $response->assertStatus(502)
 //             ->assertJsonPath('message', 'Unable to fetch transport card balance. Please try again later.');
 //     });
+
+//     test('balance returns 404 when card not found', function (): void {
+//         $response = $this->getJson('/api/transport-cards/99999/balance');
+
+//         $response->assertNotFound();
+//     });
 // });
 
 // describe('when unauthenticated', function (): void {
-//     beforeEach(function (): void {
-//         Config::set('tacom.base_url', 'https://tacom-test.example.com');
-//         Config::set('services.tacom', [
-//             'username' => 'test-user',
-//             'password' => 'test-pass',
-//             'card_number' => '036200002681705',
-//             'cpf' => '04357575125',
-//         ]);
+//     test('index returns 401', function (): void {
+//         $response = $this->getJson('/api/transport-cards');
+
+//         $response->assertUnauthorized();
 //     });
 
 //     test('balance returns 401', function (): void {
-//         $response = $this->getJson('/api/transport-card/balance');
+//         $card = TransportCard::factory()->create();
+
+//         $response = $this->getJson("/api/transport-cards/{$card->id}/balance");
 
 //         $response->assertUnauthorized();
 //     });

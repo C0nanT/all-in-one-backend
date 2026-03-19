@@ -7,10 +7,10 @@ use Modules\TransportCard\Models\TransportCardBalance;
 
 interface TransportCardBalanceRepositoryInterface
 {
-    public function getForDate(Carbon $date): ?TransportCardBalance;
+    public function getForDate(int $transportCardId, Carbon $date): ?TransportCardBalance;
 
     /**
      * @param  array<string, mixed>|null  $raw
      */
-    public function upsertForDate(Carbon $date, float $balance, string $cardNumber, ?array $raw = null): TransportCardBalance;
+    public function upsertForDate(int $transportCardId, Carbon $date, float $balance, string $cardNumber, ?array $raw = null): TransportCardBalance;
 }
